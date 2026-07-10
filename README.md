@@ -1,7 +1,7 @@
 # Modern Control of a Linearized Inverted Pendulum
 
 ## Overview
-This project implements a modern control approach for a linearized inverted pendulum system using state-space methods. The goal is to stabilize the pendulum about its upright equilibrium using state feedback and state estimation.
+This project implements a modern control approach for a linearized inverted pendulum on a cart system using state-space methods. The goal is to stabilize the pendulum about its upright equilibrium using state feedback and state estimation.
 
 The project will include:
 - linearized state-space modeling

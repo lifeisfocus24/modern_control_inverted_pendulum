@@ -6,7 +6,7 @@ Check for Controllability and Observability of Linearized cart-pole inverted pen
 """
 
 import numpy as np
-import control as ctrl
+import control as ct
 
 import pendulum_ss
 
@@ -16,7 +16,7 @@ def get_matrices():
     run_check(A, B, C)
 
 def run_check(A, B, C):
-    Ctrb = ctrl.ctrb(A, B)
+    Ctrb = ct.ctrb(A, B)
     ctrb_rank = np.linalg.matrix_rank(Ctrb)
 
     print("Controllability matrix:")
@@ -30,7 +30,7 @@ def run_check(A, B, C):
 
     print()
 
-    Obsv = ctrl.obsv(A, C)
+    Obsv = ct.obsv(A, C)
     obsv_rank = np.linalg.matrix_rank(Obsv)
 
     print("Observability matrix:")
