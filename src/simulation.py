@@ -16,7 +16,6 @@ Output:
 """
 
 import numpy as np
-import control as ct
 
 from pendulum_ss import get_ss_matrices
 from lqr_observer import design_lqr, design_observer, control_input, observer_dynamics
@@ -45,37 +44,60 @@ def main():
     #initialize storage arrays
     x_history = np.zeros((num_steps, 4))
     x_hat_history = np.zeros((num_steps, 4))
-    y_history = np.zeros((num_steps, 4))
-    u_history = np.zeros((num_steps, 4))
+    y_history = np.zeros((num_steps, 2))
+    u_history = np.zeros(num_steps)
     error_history = np.zeros((num_steps, 4))
-    innovation_history = np.zeros((num_steps, 4))
+    innovation_history = np.zeros((num_steps, 2))
 
     #time loop
     for i in range(num_steps):
 
         #calculate the control force using current estimate
-        u = float(control_input(x_hat, K))
-        
+        u = np.asarray(control_input(x_hat, K)).item()
+
         #generate the measurment from the current actual state
-        y = C @ x + D @ u 
+        y = C @ x + D[:, 0] * u 
 
         #instantaneous derivatives for plant and observer
-        x_dot = A @ x + B @ u
-        x_hat_dot = observer_dynamics(x_hat, y, u, L)
+        x_dot = A @ x + B[:, 0] * u
+        x_hat_dot, innovation = observer_dynamics(x_hat, y, u, L)
+
+        # calculate error
+        error = x - x_hat
 
         #store values
         x_history[i] = x
         x_hat_history[i] = x_hat
         y_history[i] = y
-        u_history[i] = float(np.asanyarray(u).squeze())
+        u_history[i] = u
         error_history[i] = error
         innovation_history[i] = innovation 
 
 
-        x = x + x_dot * dt
-        x_hat = x_hat + x_hat * dt
+        #Euler integration to update the States
+        if i < num_steps - 1:
+            x = x + x_dot * dt
+            x_hat = x_hat + x_hat_dot * dt
+
+        
 
 
+    return {
+        "time": time,
+        "states": x_history,
+        "estimated_states": x_hat_history,
+        "outputs": y_history,
+        "control_input": u_history,
+        "estimation_error": error_history,
+        "innovation": innovation_history,
+    }
 
 if __name__ == "__main__":
-    main()
+    results = main()
+    print(results["states"].shape)             # (10001, 4)
+    print(results["estimated_states"].shape)   # (10001, 4)
+    print(results["outputs"].shape)            # (10001, 2)
+    print(results["control_input"].shape)      # (10001,)
+    print(results["estimation_error"].shape)   # (10001, 4)
+    print(results["innovation"].shape)         # (10001, 2)
+    

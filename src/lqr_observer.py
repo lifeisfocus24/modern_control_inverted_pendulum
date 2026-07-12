@@ -58,9 +58,9 @@ def observer_dynamics(x_hat, y, u, L):
     y_hat = C @ x_hat
     innovation = y - y_hat
 
-    x_hat_dot = A @ x_hat + B @ u + L @ innovation
+    x_hat_dot = A @ x_hat + B[:, 0] * u + L @ innovation
 
-    return x_hat_dot
+    return x_hat_dot, innovation
 
 
 if __name__ == "__main__":
