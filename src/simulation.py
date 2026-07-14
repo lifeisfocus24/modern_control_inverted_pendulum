@@ -2,8 +2,9 @@
 simulation.py
 
 Simulation for the Linearized cart-pole inverted pendulum model.
-This file will contain the time loop for our simulation, executes the state-space and observer math, computes the distrubance
-The outputs of this file will updat the plant, update observer, store results.
+This file contains the simulation time loop, executes the plant and observer
+dynamics, and stores the resulting signals.
+The outputs of this file will update the plant, update observer, store results.
 
 State vector:
     x = [theta, theta_dot, cart_position, cart_velocity]^T
@@ -20,7 +21,7 @@ import numpy as np
 from pendulum_ss import get_ss_matrices
 from lqr_observer import design_lqr, design_observer, control_input, observer_dynamics
 
-def main():
+def run_simulation():
     #load the matrices and design gains
     A, B, C, D = get_ss_matrices()
 
@@ -55,7 +56,7 @@ def main():
         #calculate the control force using current estimate
         u = np.asarray(control_input(x_hat, K)).item()
 
-        #generate the measurment from the current actual state
+        #generate the measurement from the current actual state
         y = C @ x + D[:, 0] * u 
 
         #instantaneous derivatives for plant and observer
@@ -93,11 +94,12 @@ def main():
     }
 
 if __name__ == "__main__":
-    results = main()
-    print(results["states"].shape)             # (10001, 4)
-    print(results["estimated_states"].shape)   # (10001, 4)
-    print(results["outputs"].shape)            # (10001, 2)
-    print(results["control_input"].shape)      # (10001,)
-    print(results["estimation_error"].shape)   # (10001, 4)
-    print(results["innovation"].shape)         # (10001, 2)
+    results = run_simulation()
+    #temporary print out to confirm the results are within expectations
+    print(np.isfinite(results["states"]).all())
+    print(np.isfinite(results["estimated_states"]).all())
+    print(results["states"][-1])
+    print(results["estimated_states"][-1])
+    print(results["estimation_error"][-1])
+    print(np.max(np.abs(results["control_input"])))
     
